@@ -19,14 +19,12 @@ try:
     import tool
     print("[+] tool loaded!")
 
-    # Updated function priority list
     functions = [
-        "main_apv",   # ✅ তোমার main function
+        "main_apv",
+        "start_account_creation",
         "main",
         "run",
-        "start",
-        "start_checking",
-        "menu"
+        "start"
     ]
 
     for func in functions:
@@ -36,11 +34,7 @@ try:
             break
     else:
         print("[!] No runnable function found!")
-
-except ImportError as e:
-    print("[-] Module load failed!")
-    print(e)
+        print("Available:", [f for f in dir(tool) if not f.startswith("_")])
 
 except Exception as e:
-    print("[-] Runtime error:")
-    print(e)
+    print("[-] Error:", e)
