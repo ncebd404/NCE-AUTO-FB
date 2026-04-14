@@ -4,10 +4,9 @@ import os
 import sys
 import subprocess
 
-# Check 64-bit
+# 64-bit check
 if '64' not in os.uname().machine:
-    print("[-] Only 64-bit supported!")
-    sys.exit(1)
+    sys.exit("[-] Only 64-bit device supported!")
 
 # Auto update (safe)
 try:
@@ -15,19 +14,36 @@ try:
 except:
     pass
 
-# Run module
+# Load module
 try:
     import tool
+    print("[+] tool loaded!")
 
-    if hasattr(tool, "main"):
-        tool.main()
-    elif hasattr(tool, "run"):
-        tool.run()
-    elif hasattr(tool, "start_checking"):
-        tool.start_checking()
+    # Priority function list
+    functions = [
+        "main", "run", "start", "start_checking",
+        "menu", "check", "init"
+    ]
+
+    # Try auto run
+    for func in functions:
+        if hasattr(tool, func):
+            print(f"[+] Running: tool.{func}()")
+            getattr(tool, func)()
+            break
     else:
-        print("No valid entry function found!")
+        print("[!] No common function found!")
+        print("[*] Available functions:")
+        
+        all_items = dir(tool)
+        for item in all_items:
+            if not item.startswith("_"):
+                print(" -", item)
 
-except ImportError:
-    print("[-] tool module not found!")
-    print("Make sure .so file matches Python version")
+except ImportError as e:
+    print("[-] Module load failed!")
+    print(e)
+
+except Exception as e:
+    print("[-] Runtime error:")
+    print(e)
