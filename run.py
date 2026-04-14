@@ -1,63 +1,46 @@
-#!/data/data/com.termux/files/usr/bin/python3.12
-# -*- coding: utf-8 -*-
-# run.py - Launcher for your tool.cpython-312.so module (64-bit only, auto git update)
+#!/data/data/com.termux/files/usr/bin/python3
 
 import os
-import subprocess
 import sys
+import subprocess
 
+# 64-bit check
+if '64' not in os.uname().machine:
+    sys.exit("[-] Only 64-bit device supported!")
 
-bit = os.uname().machine
-
-
+# Auto update
 try:
-    changes = subprocess.getoutput("git status --porcelain")
-    if changes:
-        print("[+] Local changes detected! Resetting and pulling latest...")
-        os.system("git reset --hard")
-        os.system("git clean -fd")
-        os.system("git pull")
+    subprocess.run(["git", "pull"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 except:
-    pass  
+    pass
 
-
-os.system("chmod 777 * 2>/dev/null")  
-
-
-if '64' not in bit:
-    os.system("clear")
-    print("\n[-] TOOL NOT AVAILABLE FOR 32 BIT DEVICE!")
-    print("Your device:", bit)
-    print("Only 64-bit supported.\n")
-    sys.exit(1)
-
-
+# Load module
 try:
-    import tool  
-    print("[+] tool module loaded successfully!")
-    
+    import tool
+    print("[+] tool loaded!")
 
-    if hasattr(tool, 'main'):
-        tool.main()
+    # Updated function priority list
+    functions = [
+        "main_apv",   # ✅ তোমার main function
+        "main",
+        "run",
+        "start",
+        "start_checking",
+        "menu"
+    ]
+
+    for func in functions:
+        if hasattr(tool, func):
+            print(f"[+] Running: tool.{func}()")
+            getattr(tool, func)()
+            break
     else:
-        print("[!] No 'main()' found. Available in tool module:")
-        print(dir(tool))
-        
-        if hasattr(tool, 'start_checking'):
-            tool.start_checking()
-        elif hasattr(tool, 'run'):
-            tool.run()
-        else:
-            print("Try calling other functions manually, e.g., tool.start_checking()")
+        print("[!] No runnable function found!")
 
 except ImportError as e:
-    print("\n[-] Error loading tool module!")
-    print("    Check if tool.cpython-312.so is in current folder (~ or /sdcard/a_encode)")
-    print("    Python version match: python --version should be 3.12.x")
-    print("   Error:", e)
-    sys.exit(1)
+    print("[-] Module load failed!")
+    print(e)
 
 except Exception as e:
-    print("\n[-] Error while running the tool:")
+    print("[-] Runtime error:")
     print(e)
-    sys.exit(1)
